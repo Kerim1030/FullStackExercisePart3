@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
-import axios from 'axios'
 import personService from './services/persons'
 import Notification from './components/Notification'
 
@@ -31,7 +30,7 @@ const App = () => {
           setNewNumber('')
         })
         .catch(error => {
-          setErrorMessage(`Information of ${newName} has already been removed from server`)
+          setErrorMessage( error `Information of ${newName} has already been removed from server`)
           setTimeout(() => {
             setErrorMessage(null)
           }, 5000)
@@ -69,7 +68,7 @@ const App = () => {
     }
     personService
       .supprimer(id)
-      .then(response => {
+      .then(() => {
         setPersons(persons.filter(person => person.id !== id))
       })
   }

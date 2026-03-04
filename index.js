@@ -14,24 +14,24 @@ const cors = require('cors')
 app.use(cors())
 
 /*let persons = [
-    { 
+    {
       "id": 1,
-      "name": "Arto Hellas", 
+      "name": "Arto Hellas",
       "number": "040-123456"
     },
-    { 
+    {
       "id": 2,
-      "name": "Ada Lovelace", 
+      "name": "Ada Lovelace",
       "number": "39-44-5323523"
     },
-    { 
+    {
       "id": 3,
-      "name": "Dan Abramov", 
+      "name": "Dan Abramov",
       "number": "12-43-234345"
     },
-    { 
+    {
       "id": 4,
-      "name": "Mary Poppendieck", 
+      "name": "Mary Poppendieck",
       "number": "39-23-6423122"
     }
 ]*/
@@ -40,24 +40,24 @@ app.use(cors())
 
 
 app.get('/api/persons', (request, response, next) => {
-  Phone.find({}).then((phones) => {
-    response.json(phones)
-  }).catch(error => next(error))
+    Phone.find({}).then((phones) => {
+        response.json(phones)
+    }).catch(error => next(error))
 })
 
-app.get('/info', (request, response) => {
-  const date = new Date()
-  /*response.send(`<p>Phonebook has info for ${persons.length} people</p>
+app.get('/info', (request, response, next) => {
+    const date = new Date()
+    /*response.send(`<p>Phonebook has info for ${persons.length} people</p>
     <p>${date}</p>
   `)*/
-  Phone.find({}).then((phones) => {
-    response.send(`<p>Phonebook has info for ${phones.length} people</p>
+    Phone.find({}).then((phones) => {
+        response.send(`<p>Phonebook has info for ${phones.length} people</p>
     <p>${date}</p>`)
-  }).catch(error => next(error))
+    }).catch(error => next(error))
 })
 
-app.get('/api/persons/:id', (request, response, next) => {
-  /*const id = Number(request.params.id)
+app.get('/api/persons/:id', (request, response) => {
+    /*const id = Number(request.params.id)
   const person = persons.find(p => p.id === id)
     if (person) {
         response.json(person)
@@ -66,26 +66,26 @@ app.get('/api/persons/:id', (request, response, next) => {
     }
     */
 
-  Phone.findById(request.params.id).then((phone) => {
-    response.json(phone)
-  }).catch((err) => {
-    console.log(err)
-    response.status(404).end()
-  })
+    Phone.findById(request.params.id).then((phone) => {
+        response.json(phone)
+    }).catch((err) => {
+        console.log(err)
+        response.status(404).end()
+    })
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  /*const id = Number(request.params.id)
+    /*const id = Number(request.params.id)
   persons = persons.filter(person => person.id !== id)
 
   response.status(204).end()
   */
-  
-  Phone.findByIdAndDelete(request.params.id)
-    .then(() => {
-      response.status(204).end()
-    })
-    .catch(error => next(error))
+
+    Phone.findByIdAndDelete(request.params.id)
+        .then(() => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 
@@ -98,22 +98,22 @@ app.delete('/api/persons/:id', (request, response, next) => {
 }*/
 
 app.post('/api/persons', (request, response,next) => {
-  const body = request.body
+    const body = request.body
 
-  console.log(body)
+    console.log(body)
 
-  if (!body.name || !body.number) {
-    return response.status(400).json({ 
-      error: 'name or number missing' 
+    if (!body.name || !body.number) {
+        return response.status(400).json({
+            error: 'name or number missing'
+        })
+    }
+
+    /*if (persons.find(p => p.name === body.name)) {
+    return response.status(400).json({
+      error: 'name must be unique'
     })
   }
 
-  /*if (persons.find(p => p.name === body.name)) {
-    return response.status(400).json({ 
-      error: 'name must be unique' 
-    })
-  }
-  
   const person = {
     id: generateId(),
     name: body.name,
@@ -125,43 +125,43 @@ app.post('/api/persons', (request, response,next) => {
   response.json(person)
   */
 
-  const phone = new Phone({
-    name: body.name,
-    number: body.number,
-  })
-  phone.save().then(savedPhone => {
-    response.json(savedPhone)
-  }).catch(error => next(error))
+    const phone = new Phone({
+        name: body.name,
+        number: body.number,
+    })
+    phone.save().then(savedPhone => {
+        response.json(savedPhone)
+    }).catch(error => next(error))
 })
 
 
 
 
 app.put('/api/persons/:id', (request, response, next) => {
-  const { name, number } = request.body
-  Phone.findByIdAndUpdate(request.params.id,{ name, number },
-    { new: true, runValidators: true, context: 'query' })
-    .then(updatedPhone => {
-      response.json(updatedPhone)
-    }).catch(error => next(error))
+    const { name, number } = request.body
+    Phone.findByIdAndUpdate(request.params.id,{ name, number },
+        { new: true, runValidators: true, context: 'query' })
+        .then(updatedPhone => {
+            response.json(updatedPhone)
+        }).catch(error => next(error))
 
 })
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`)
 })
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
+    console.error(error.message)
 
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message }) 
-  }
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
+    }
 
-  next(error)
+    next(error)
 }
 
 // this has to be the last loaded middleware.
