@@ -54,9 +54,14 @@ const App = () => {
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
-    })
-
-  }
+    }).catch(error => {
+      console.log(error.response.data.error)
+      setErrorMessage(error.response.data.error)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+  }) 
+}
 
   const supprimerPerson = (id) => {
     if (!window.confirm('Are you sure you want to delete this person?')) {
