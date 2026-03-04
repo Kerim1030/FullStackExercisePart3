@@ -128,6 +128,23 @@ app.post('/api/persons', (request, response) => {
   }).catch(error => next(error))
 })
 
+
+
+
+app.put('/api/persons/:id', (request, response) => {
+  const body = request.body
+
+  const phone = {
+    name: body.name,
+    number: body.number,
+  }
+  Phone.findByIdAndUpdate(request.params.id, phone, { new: true })
+    .then(updatedPhone => {
+      response.json(updatedPhone)
+    }).catch(error => next(error))
+
+})
+
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
