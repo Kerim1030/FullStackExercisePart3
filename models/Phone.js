@@ -21,7 +21,16 @@ const phoneSchema = new mongoose.Schema({
     minLength: 3,
     required: true
   },
-  number: String,
+  number: {
+    type: String,
+    minLength: 8,
+    required: true,
+    validate: {
+    validator: function(v) {
+      return /\d{3}-\d{3}-\d{4}/.test(v);
+    },
+  }
+ }
 })
 
 phoneSchema.set('toJSON', {
