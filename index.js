@@ -42,7 +42,7 @@ app.use(cors())
 app.get('/api/persons', (request, response) => {
   Phone.find({}).then((phones) => {
     response.json(phones)
-  })
+  }).catch(error => next(error))
 })
 
 app.get('/info', (request, response) => {
@@ -79,7 +79,7 @@ app.delete('/api/persons/:id', (request, response) => {
     .then(() => {
       response.status(204).end()
     })
-    .catch((err) => next(err))
+    .catch(error => next(error))
 })
 
 
@@ -125,10 +125,23 @@ app.post('/api/persons', (request, response) => {
   })
   phone.save().then(savedPhone => {
     response.json(savedPhone)
-  })
+  }).catch(error => next(error))
 })
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+// this has to be the last loaded middleware.
+app.use(errorHandler)
