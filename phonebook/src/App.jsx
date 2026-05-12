@@ -1,99 +1,99 @@
 import { useState, useEffect } from 'react'
-import PersonForm from './components/PersonForm'
-import Filter from './components/Filter'
-import Persons from './components/Persons'
-import personService from './services/persons'
+import FormulairePersonne from './components/FormulairePersonne'
+import Filtre from './components/Filtre'
+import Personnes from './components/Personnes'
+import personneService from './services/personnes'
 import Notification from './components/Notification'
 
 const App = () => {
-  const [persons, setPersons] = useState([]) 
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
-  const [showFilter, setShowFilter] = useState('')
-  const [errorMessage, setErrorMessage] = useState(null)
-  
-  const showAll = showFilter === '' ? persons : persons.filter(person => person.name.toLowerCase().includes(showFilter.toLowerCase()))
+  const [personnes, setPersonnes] = useState([])
+  const [nouveauNom, setNouveauNom] = useState('')
+  const [nouveauNumero, setNouveauNumero] = useState('')
+  const [filtre, setFiltre] = useState('')
+  const [message, setMessage] = useState(null)
 
-  const addPerson = (event) => {
+  const tousAfficher = filtre === ''
+    ? personnes
+    : personnes.filter(p => p.name.toLowerCase().includes(filtre.toLowerCase()))
+
+  const ajouterPersonne = (event) => {
     event.preventDefault()
-    if (persons.some(person => person.name === newName)) {
-      if (!window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+
+    if (personnes.some(p => p.name === nouveauNom)) {
+      if (!window.confirm(`${nouveauNom} est déjà dans le répertoire, remplacer l'ancien numéro ?`)) {
         return
       }
-      const person = persons.find(p => p.name === newName)
-      const changedPerson = { ...person, number: newNumber }
-      personService
-        .update(person.id, changedPerson)
-        .then(response => {
-          setPersons(persons.map(p => p.id !== person.id ? p : response))
-          setNewName('')
-          setNewNumber('')
+      const personne = personnes.find(p => p.name === nouveauNom)
+      const personneModifiee = { ...personne, number: nouveauNumero }
+      personneService
+        .mettreAJour(personne.id, personneModifiee)
+        .then(reponse => {
+          setPersonnes(personnes.map(p => p.id !== personne.id ? p : reponse))
+          setNouveauNom('')
+          setNouveauNumero('')
         })
-        .catch(error => {
-          setErrorMessage( error `Information of ${newName} has already been removed from server`)
-          setTimeout(() => {
-            setErrorMessage(null)
-          }, 5000)
-          setPersons(persons.filter(p => p.id !== person.id))
+        .catch(() => {
+          setMessage(`${nouveauNom} a déjà été supprimé du serveur`)
+          setTimeout(() => setMessage(null), 5000)
+          setPersonnes(personnes.filter(p => p.id !== personne.id))
         })
       return
     }
 
-    const personObject = {
-      name: newName,
-      number: newNumber
+    const nouvellePersonne = {
+      name: nouveauNom,
+      number: nouveauNumero
     }
-    personService
-    .create(personObject)
-    .then(response => {
-      setPersons(persons.concat(response))
-      setNewName('')
-      setNewNumber('')
-      setErrorMessage(`Added ${newName}`)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }).catch(error => {
-      console.log(error.response.data.error)
-      setErrorMessage(error.response.data.error)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-  }) 
-}
 
-  const supprimerPerson = (id) => {
-    if (!window.confirm('Are you sure you want to delete this person?')) {
-      return
-    }
-    personService
-      .supprimer(id)
-      .then(() => {
-        setPersons(persons.filter(person => person.id !== id))
+    personneService
+      .creer(nouvellePersonne)
+      .then(reponse => {
+        setPersonnes(personnes.concat(reponse))
+        setNouveauNom('')
+        setNouveauNumero('')
+        setMessage(`${nouveauNom} ajouté`)
+        setTimeout(() => setMessage(null), 5000)
+      })
+      .catch(erreur => {
+        setMessage(erreur.response.data.error)
+        setTimeout(() => setMessage(null), 5000)
       })
   }
 
-  
+  const gererSuppression = (id) => {
+    if (!window.confirm('Voulez-vous vraiment supprimer cette personne ?')) {
+      return
+    }
+    personneService
+      .supprimer(id)
+      .then(() => {
+        setPersonnes(personnes.filter(p => p.id !== id))
+      })
+  }
 
   useEffect(() => {
-    console.log('effect')
-    personService
-      .getAll()
-      .then(response => {
-        setPersons(response)
+    personneService
+      .getTous()
+      .then(reponse => {
+        setPersonnes(reponse)
       })
   }, [])
-  console.log('render', persons.length, 'persons')
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <Notification message={errorMessage} />
-      <Filter showFilter={showFilter} setShowFilter={setShowFilter} />
-      <h3>Add a new</h3>
-      <PersonForm addPerson={addPerson} newName={newName} setNewName={setNewName} newNumber={newNumber} setNewNumber={setNewNumber} />
-      <h3>Numbers</h3>
-      <Persons showAll={showAll} handleDelete={supprimerPerson} />
+      <h2>Répertoire téléphonique</h2>
+      <Notification message={message} />
+      <Filtre filtre={filtre} setFiltre={setFiltre} />
+      <h3>Ajouter un nouveau</h3>
+      <FormulairePersonne
+        ajouterPersonne={ajouterPersonne}
+        nouveauNom={nouveauNom}
+        setNouveauNom={setNouveauNom}
+        nouveauNumero={nouveauNumero}
+        setNouveauNumero={setNouveauNumero}
+      />
+      <h3>Numéros</h3>
+      <Personnes tousAfficher={tousAfficher} gererSuppression={gererSuppression} />
     </div>
   )
 }
